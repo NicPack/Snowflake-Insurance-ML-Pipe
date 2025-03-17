@@ -3,12 +3,15 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from snowflake.ml.registry import registry
 from snowflake.snowpark import Session
 
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 def get_snowflake_session():
