@@ -1,30 +1,27 @@
 # Import python packages
+import json
 import os
 
 import pandas as pd
 import streamlit as st
 from snowflake.ml.registry import registry
 from snowflake.snowpark import Session
-from snowflake.snowpark.context import get_active_session
+
+connection_parameters = json.dumps(
+    {
+        "account": os.environ["SNOWFLAKE_ACCOUNT"],
+        "user": os.environ["SNOWFLAKE_USER"],
+        "password": os.environ["SNOWFLAKE_PASSWORD"],
+        "warehouse": os.environ["SNOWFLAKE_WAREHOUSE"],
+        "database": os.environ["SNOWFLAKE_DATABASE"],
+        "schema": os.environ["SNOWFLAKE_SCHEMA"],
+    }
+)
 
 
-def get_snowflake_session():
-    return Session.builder.configs(
-        {
-            "account": os.environ["SNOWFLAKE_ACCOUNT"],
-            "user": os.environ["SNOWFLAKE_USER"],
-            "password": os.environ["SNOWFLAKE_PASSWORD"],
-            "warehouse": os.environ["SNOWFLAKE_WAREHOUSE"],
-            "database": os.environ["SNOWFLAKE_DATABASE"],
-            "schema": os.environ["SNOWFLAKE_SCHEMA"],
-        }
-    ).create()
-
-
-# Connect to Snowflake
 @st.cache_resource()
-def connect_to_snowflake():
-    session = get_snowflake_session()
+def connect_to_snowflake(connection_parameters=connection_parameters):
+    session = Session.builder.configs(connection_parameters).create()
     session.use_database("INSURANCE")
     session.use_schema("ML_PIPE")
     session.use_warehouse("COMPUTE_WH")
@@ -35,9 +32,6 @@ def connect_to_snowflake():
 
 
 session = connect_to_snowflake()
-
-
-session = get_active_session()
 
 # Create model registry and add to session state
 model_registry = registry.Registry(
