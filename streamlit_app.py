@@ -13,6 +13,7 @@ def connect_to_snowflake():
             "account": st.secrets.snowflake.account,
             "user": st.secrets.snowflake.user,
             "password": st.secrets.snowflake.password,
+            "role": st.secrets.snowflake.role,
             "warehouse": st.secrets.snowflake.warehouse,
             "database": st.secrets.snowflake.database,
             "schema": st.secrets.snowflake.schema,
