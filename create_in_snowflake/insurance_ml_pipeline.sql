@@ -34,10 +34,9 @@ CREATE or REPLACE TABLE INSURANCE.ML_PIPE.INCOMING_DATA_SOURCE(
     CHARGES FLOAT
 );
 
--- Load full dataset into Snowflake then insert 10k rows into the SOURCE_OF_TRUTH table and 990k rows into the INCOMING_DATA_SOURCE table
+-- Load full dataset then insert 10k rows into the SOURCE_OF_TRUTH table and 990k rows into the INCOMING_DATA_SOURCE table
 
--- Run the train_and_save_model.sql. This will create the training sproc
-
+-- Run the train_and_save_model.sql and create the training sproc
 CREATE OR REPLACE EVENT TABLE INSURANCE.ML_PIPE.MODEL_TRACES;
 ALTER ACCOUNT SET EVENT_TABLE = INSURANCE.ML_PIPE.MODEL_TRACES;
 
@@ -52,7 +51,7 @@ ALTER TASK TRAIN_SAVE_TASK RESUME;
 
 EXECUTE TASK TRAIN_SAVE_TASK;
 
--- Create the landing table (where streamed-in records will land)
+-- Create the landing table
 CREATE or REPLACE TABLE INSURANCE.ML_PIPE.LANDING_TABLE (
 	AGE NUMBER(3,0),
 	GENDER VARCHAR(6),
@@ -68,7 +67,7 @@ CREATE or REPLACE TABLE INSURANCE.ML_PIPE.LANDING_TABLE (
     CHARGES FLOAT
 );
 
--- Create the stream on the landing table
+-- Create stream on the landing table
 CREATE OR REPLACE STREAM STREAM_ON_LANDING ON TABLE LANDING_TABLE;
 
 -- Create a gold table for the records and their predictions to land
@@ -92,7 +91,7 @@ CREATE OR REPLACE TABLE INSURANCE_GOLD(
     PREDICTED_CHARGES FLOAT
 );
 
--- Insert records into the landing table to simulate streamed data
+-- Simulate streamed data
 INSERT INTO LANDING_TABLE(
     AGE ,
 	GENDER,
@@ -122,9 +121,9 @@ INSERT INTO LANDING_TABLE(
 FROM INCOMING_DATA_SOURCE
 LIMIT 10000;
 
--- Run the predict_and_write.sql file. This will create the prediction/write to gold sproc
+-- Run predict_and_write.sql to create write_to_gold sproc
 
--- Call the prediction SPROC to see it work on the data loaded into the stream.
+-- Check if it works on the data loaded into the stream.
 CALL PREDICT_WRITE_TO_GOLD();
 
 -- Create the predict and write task

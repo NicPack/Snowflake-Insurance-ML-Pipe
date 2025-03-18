@@ -64,15 +64,10 @@ def train_save_ins_model(session: Session, source_of_truth: str, major_version: 
                 FEATURE_COLUMN_NAMES = [i for i in df.schema.names if i not in LABEL_COLUMNS]
                 OUTPUT_COLUMNS = [''PREDICTED_CHARGES'']
 
-                # Define Snowflake numeric types (possibly for scaling, ordinal encoding)
-                # numeric_types = [T.DecimalType, T.DoubleType, T.FloatType, T.IntegerType, T.LongType]
-                # numeric_columns = [col.name for col in df.schema.fields if (type(col.datatype) in numeric_types) and (col.name in FEATURE_COLUMN_NAMES)]
-
                 # Define Snowflake categorical types and determine which columns to OHE
                 categorical_types = [T.StringType]
                 cols_to_ohe = [col.name for col in df.schema.fields if (type(col.datatype) in categorical_types)]
                 ohe_cols_output = [col + ''_OHE'' for col in cols_to_ohe]
-
 
                 # Standardize the values in the rows by removing spaces, capitalizing
                 def fix_values(columnn):
@@ -93,8 +88,6 @@ def train_save_ins_model(session: Session, source_of_truth: str, major_version: 
                 try:
                     pipe = Pipeline(
                         steps=[
-                            #(''imputer'', SimpleImputer(input_cols=all_cols)),
-                            #(''mms'', snowmlpp.MinMaxScaler(input_cols=cols_to_scale, output_cols=scale_cols_output)),
                             (''ohe'', snowmlpp.OneHotEncoder(input_cols=cols_to_ohe, output_cols=ohe_cols_output, drop_input_cols=True)),
                             (''grid_search_reg'', GridSearchCV(estimator=XGBRegressor(),
                                                                 param_grid={ "n_estimators":[50, 100, 200], # 25
@@ -138,8 +131,6 @@ def train_save_ins_model(session: Session, source_of_truth: str, major_version: 
                     return (f''Error with predicting with pipeline: {e}'')
 
 
-                # Use Snowpark ML metrics to calculate MAPE and MSE
-
                 # Calculate MAPE
                 mape = mean_absolute_percentage_error(df=results, y_true_col_names=LABEL_COLUMNS, y_pred_col_names=OUTPUT_COLUMNS)
 
@@ -151,7 +142,7 @@ def train_save_ins_model(session: Session, source_of_truth: str, major_version: 
             # Model registration
             with tracer.start_as_current_span("model_registration"):
                 def set_model_version(registry_object,model_name, major_version=True):
-                    # See what we''ve logged so far, dynamically set the model version
+                    # Dynamically set the model version
                     import numpy as np
                     import json
                     
@@ -182,7 +173,7 @@ def train_save_ins_model(session: Session, source_of_truth: str, major_version: 
                         model_new_version = round(model_last_version + .1,2)
                         model_new_version = ''V'' + str(model_new_version)
                         
-                    return model_new_version # This is the version we will use when we log the new model.
+                    return model_new_version
 
                 # Create model regisry object
                 try:
