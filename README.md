@@ -2,8 +2,7 @@
 
 The purpose of this project was to create a Machine Learning Pipeline in Snowflake. <br>
 Data I used was the popular kaggle [insurance dataset](https://www.kaggle.com/datasets/sridharstreaks/insurance-data-for-machine-learning/data). <br>
-The result is a website available at the [link](https://app-insurance-ml-pipe.streamlit.app/) <br>
-<br>
+The result is a website available at the [link](https://app-insurance-ml-pipe.streamlit.app/)
 
 ## The site
 ### Predicied vs actual
