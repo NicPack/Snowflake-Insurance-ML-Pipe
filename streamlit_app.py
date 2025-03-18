@@ -1,19 +1,9 @@
 # Import python packages
-import os
 
 import pandas as pd
 import streamlit as st
 from snowflake.ml.registry import registry
 from snowflake.snowpark import Session
-
-connection_parameters = {
-    "account": os.environ["SNOWFLAKE_ACCOUNT"],
-    "user": os.environ["SNOWFLAKE_USER"],
-    "password": os.environ["SNOWFLAKE_PASSWORD"],
-    "warehouse": os.environ["SNOWFLAKE_WAREHOUSE"],
-    "database": os.environ["SNOWFLAKE_DATABASE"],
-    "schema": os.environ["SNOWFLAKE_SCHEMA"],
-}
 
 
 @st.cache_resource()
