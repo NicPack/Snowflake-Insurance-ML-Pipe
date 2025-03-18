@@ -1,5 +1,4 @@
 # Import python packages
-import json
 import os
 
 import pandas as pd
@@ -7,27 +6,33 @@ import streamlit as st
 from snowflake.ml.registry import registry
 from snowflake.snowpark import Session
 
-connection_parameters = json.dumps(
-    {
-        "account": os.environ["SNOWFLAKE_ACCOUNT"],
-        "user": os.environ["SNOWFLAKE_USER"],
-        "password": os.environ["SNOWFLAKE_PASSWORD"],
-        "warehouse": os.environ["SNOWFLAKE_WAREHOUSE"],
-        "database": os.environ["SNOWFLAKE_DATABASE"],
-        "schema": os.environ["SNOWFLAKE_SCHEMA"],
-    }
-)
+connection_parameters = {
+    "account": os.environ["SNOWFLAKE_ACCOUNT"],
+    "user": os.environ["SNOWFLAKE_USER"],
+    "password": os.environ["SNOWFLAKE_PASSWORD"],
+    "warehouse": os.environ["SNOWFLAKE_WAREHOUSE"],
+    "database": os.environ["SNOWFLAKE_DATABASE"],
+    "schema": os.environ["SNOWFLAKE_SCHEMA"],
+}
 
 
 @st.cache_resource()
-def connect_to_snowflake(connection_parameters=connection_parameters):
-    session = Session.builder.configs(connection_parameters).create()
-    session.use_database("INSURANCE")
-    session.use_schema("ML_PIPE")
-    session.use_warehouse("COMPUTE_WH")
-    print("Connected to Snowflake successfully")
-    if "session" not in st.session_state:
-        st.session_state.session = session
+def connect_to_snowflake():
+    session = Session.builder.configs(
+        {
+            "account": st.secrets.snowflake.account,
+            "user": st.secrets.snowflake.user,
+            "password": st.secrets.snowflake.password,
+            "warehouse": st.secrets.snowflake.warehouse,
+            "database": st.secrets.snowflake.database,
+            "schema": st.secrets.snowflake.schema,
+        }
+    ).create()
+
+    session.use_warehouse(st.secrets.snowflake.warehouse)
+    session.use_database(st.secrets.snowflake.database)
+    session.use_schema(st.secrets.snowflake.schema)
+
     return session
 
 
